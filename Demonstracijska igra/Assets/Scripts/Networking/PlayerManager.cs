@@ -35,4 +35,9 @@ public class PlayerManager : MonoBehaviour
         PhotonNetwork.Destroy(_player);
         CreateController();
     }
+
+    public void DieAndLeave()
+    {
+        PhotonNetwork.Destroy(_player);
+    }
 }

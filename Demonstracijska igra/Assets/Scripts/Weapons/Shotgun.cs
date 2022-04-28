@@ -28,7 +28,7 @@ public class Shotgun : Gun
         _shootingRay.origin = _camera.transform.position;
         if (Physics.Raycast(_shootingRay, out RaycastHit hit))
         {
-            hit.collider.gameObject.gameObject.GetComponent<IDamageable>()?.TakeDamage(((GunInfo)_itemInfo).damage);
+            hit.collider.gameObject.gameObject.GetComponent<IDamageable>()?.TakeDamage(((GunInfo)_itemInfo).damage, _photonView.Owner);
             _photonView.RPC("RPC_Shoot", RpcTarget.All, hit.point, hit.normal);
         }
 
@@ -44,7 +44,6 @@ public class Shotgun : Gun
             bulletImp.transform.SetParent(colliders[0].transform);
             //destroy after 10 seconds
             Destroy(bulletImp, 10f);
-
         }
     }
 }

@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
@@ -15,6 +16,8 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
     [SerializeField] private float _jumpForce;
     [SerializeField] private float _smoothTime;
     [SerializeField] private float _rotateSensitivity;
+    [SerializeField] private Image _healthBar;
+    [SerializeField] private GameObject _UI;
 
     [SerializeField] private Item[] _items;
     private int _currentlyEquippedItemIndex = -1;
@@ -29,6 +32,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
     private PhotonView _photonView;
 
     private float _health = 100f;
+    private float _maxHealth = 100f;
 
     private PlayerManager _playerManager;
 
@@ -40,6 +44,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
         _playerManager = PhotonView.Find((int)_photonView.InstantiationData[0]).GetComponent<PlayerManager>();
         _maxRotation = 90f;
         _onFloor = true;
+        //_healthBar.GetComponent<Image>().fillAmount = (_health / _maxHealth);
     }
 
     private void Start()
@@ -48,10 +53,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
         {
             Destroy(GetComponentInChildren<Camera>().gameObject);
             Destroy(_rigidbody);
+            Destroy(_UI);
         }
         else
         {
             EquipItem(0);
+            FindObjectOfType<GameUIManager>().SetPlayerPV(_photonView);
         }
     }
 
@@ -168,29 +175,45 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
         }
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, Player shooter)
     {
-        _photonView.RPC("RPC_TakeDamage", RpcTarget.All, damage);
+        _photonView.RPC("RPC_TakeDamage", RpcTarget.All, damage, shooter);
     }
 
     [PunRPC]
 
-    void RPC_TakeDamage(float damage)
+    void RPC_TakeDamage(float damage, Player shooter)
     {
         if (!_photonView.IsMine)
         {
             return;
         }
         _health -= damage;
+        _healthBar.GetComponent<Image>().fillAmount = (_health / _maxHealth);
         if (_health <= 0)
         {
+            _photonView.RPC("RPC_KillScoreboard", RpcTarget.All, shooter);
             Die();
         }
     }
 
     private void Die()
     {
+        _photonView.RPC("RPC_DeathScoreboard", RpcTarget.All, _photonView.Owner);
         _playerManager.Die();
+        // FindObjectOfType<Scoreboard>().PlayerDied(_photonView.Owner);
+
+    }
+    [PunRPC]
+    void RPC_DeathScoreboard(Player player)
+    {
+        FindObjectOfType<Scoreboard>().PlayerDied(player);
+    }
+
+    [PunRPC]
+    void RPC_KillScoreboard(Player player)
+    {
+        FindObjectOfType<Scoreboard>().PlayerKills(player);
     }
 
     private void OnTriggerEnter(Collider other)
