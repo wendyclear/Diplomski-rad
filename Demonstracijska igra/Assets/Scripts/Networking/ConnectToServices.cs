@@ -30,7 +30,7 @@ public class ConnectToServices : MonoBehaviourPunCallbacks //MonoBehaviourPunCal
         //connects to photon master server using the settings from PhotonServerSettings object (region, etc...)
         //Debug.Log("Connecting to master...");
         PhotonNetwork.ConnectUsingSettings();
-        PhotonNetwork.NickName = "Player " + Random.Range(0, 1000).ToString();
+        //PhotonNetwork.NickName = "Player " + Random.Range(0, 1000).ToString();
     }
 
     public override void OnConnectedToMaster()
@@ -111,7 +111,6 @@ public class ConnectToServices : MonoBehaviourPunCallbacks //MonoBehaviourPunCal
         GameObject listing;
         for (int i = 0; i < roomList.Count; i++)
         {
-            Debug.Log("Existing room : " + roomList[i].Name + " ukupno soba : " + roomList.Count);
             if (roomList[i].RemovedFromList) continue;
             listing = Instantiate(_roomListing, _roomListContent);
             listing.GetComponent<ListItem>().SetUp(roomList[i]);

@@ -59,23 +59,28 @@
     <Compile Include="Assets\Scripts\Weapons\GunInfo.cs" />
     <Compile Include="Assets\Scripts\Networking\PlayerManager.cs" />
     <Compile Include="Assets\Scripts\Player\FloorCollider.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerVisuals.cs" />
     <Compile Include="Assets\Scripts\UI\ListItem.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerListItem.cs" />
-    <Compile Include="Assets\Scripts\Spawnpoint.cs" />
+    <Compile Include="Assets\Scripts\Player\Spawnpoint.cs" />
+    <Compile Include="Assets\Scripts\Weapons\Bullet.cs" />
     <Compile Include="Assets\Scripts\Weapons\Item.cs" />
-    <Compile Include="Assets\Scripts\PlayerSpawnManager.cs" />
+    <Compile Include="Assets\Scripts\UI\GameUIManager.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerSpawnManager.cs" />
+    <Compile Include="Assets\Scripts\Game\Timer.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Misc\IDamageable.cs" />
-    <Compile Include="Assets\Scripts\Scoreboard.cs" />
+    <Compile Include="Assets\PlayerNickname.cs" />
+    <Compile Include="Assets\Scripts\UI\Scoreboard.cs" />
     <Compile Include="Assets\Scripts\Networking\ConnectToServices.cs" />
-    <Compile Include="Assets\Scripts\ScoreboardItem.cs" />
+    <Compile Include="Assets\Scripts\UI\ScoreboardItem.cs" />
     <Compile Include="Assets\Scripts\UI\PlayerUsername.cs" />
-    <Compile Include="Assets\Scripts\Weapons\Shotgun.cs" />
+    <Compile Include="Assets\Scripts\UI\KDCounter.cs" />
+    <Compile Include="Assets\Scripts\Weapons\Weapon.cs" />
     <Compile Include="Assets\Scripts\UI\CanvasManager.cs" />
     <Compile Include="Assets\Scripts\Weapons\ItemInfo.cs" />
     <Compile Include="Assets\Scripts\Game\WorldManager.cs" />
     <Compile Include="Assets\Scripts\Weapons\Gun.cs" />
-    <Compile Include="Assets\GameUIManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections;
@@ -6,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
-public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
+public class PlayerController : MonoBehaviourPunCallbacks, IDamageable, IOnEventCallback
 {
     [SerializeField] private GameObject _cameraHolder;
     private Rigidbody _rigidbody;
@@ -36,15 +37,26 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
 
     private PlayerManager _playerManager;
 
+    private bool _activeWeapons = true;
+    public bool _changeColor = false;
+
+    private bool _gameOn = true;
+
+    public enum EventCodes : byte
+    {
+        RefreshTimer,
+        EndMatch
+    }
+
 
     private void Awake()
     {
+        _UI.SetActive(true);
         _rigidbody = GetComponent<Rigidbody>();
         _photonView = GetComponent<PhotonView>();
         _playerManager = PhotonView.Find((int)_photonView.InstantiationData[0]).GetComponent<PlayerManager>();
         _maxRotation = 90f;
         _onFloor = true;
-        //_healthBar.GetComponent<Image>().fillAmount = (_health / _maxHealth);
     }
 
     private void Start()
@@ -57,21 +69,29 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
         }
         else
         {
-            EquipItem(0);
+            if (_activeWeapons) EquipItem(0);
             FindObjectOfType<GameUIManager>().SetPlayerPV(_photonView);
         }
     }
 
     private void Update()
     {
-        if (_photonView.IsMine)
+        if (_photonView.IsMine && _gameOn)
         {
             Look();
             Move();
             Jump();
             SwitchWeapon();
-            UseItem();
+            ChangeColor();
+            if (_activeWeapons) UseItem();
         }
+    }
+
+    private void ChangeColor()
+    {
+        if (!Input.GetKeyDown(KeyCode.C)) return;
+        _changeColor = false;
+        GetComponent<PlayerVisuals>().ChangeColor();
     }
 
     private void Look()
@@ -106,12 +126,16 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
         //all physics and movement here, so movement isnt impacted by FPS
         if (_photonView.IsMine)
         {
-            _rigidbody.MovePosition(_rigidbody.position + transform.TransformDirection(_moveAmount * Time.deltaTime));
+            if (!Physics.CheckBox(_rigidbody.position + transform.TransformDirection(_moveAmount * Time.deltaTime) + Vector3.up * 4, new Vector3(0.1f, 0.1f, 0.1f), Quaternion.identity))
+            {
+                _rigidbody.MovePosition(_rigidbody.position + transform.TransformDirection(_moveAmount * Time.deltaTime));
+            }
         }
     }
 
     private void EquipItem(int index)
     {
+        if (_items.Length < 1) return;
         if (index == _currentlyEquippedItemIndex) return;
         if (index < 0) _currentlyEquippedItemIndex = _items.Length - 1;
         else if (index > (_items.Length - 1)) _currentlyEquippedItemIndex = 0;
@@ -208,12 +232,14 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
     void RPC_DeathScoreboard(Player player)
     {
         FindObjectOfType<Scoreboard>().PlayerDied(player);
+        FindObjectOfType<KDCounter>().Deaths(player);
     }
 
     [PunRPC]
     void RPC_KillScoreboard(Player player)
     {
         FindObjectOfType<Scoreboard>().PlayerKills(player);
+        FindObjectOfType<KDCounter>().Kills(player);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -223,5 +249,29 @@ public class PlayerController : MonoBehaviourPunCallbacks, IDamageable
             Die();
         }
 
+    }
+
+    public void OnEvent(EventData photonEvent)
+    {
+        if (photonEvent.Code >= 200) return;
+        int code = (int)photonEvent.Code;
+        switch (code)
+        {
+            case ((int)EventCodes.EndMatch):
+                EndGame();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void EndGame()
+    {
+        if (_photonView.IsMine)
+        {
+            _gameOn = false;
+            _UI.SetActive(false);
+            _rigidbody.isKinematic = false;
+        }
     }
 }

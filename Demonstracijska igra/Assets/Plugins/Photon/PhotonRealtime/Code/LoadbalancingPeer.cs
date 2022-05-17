@@ -1376,6 +1376,11 @@ namespace Photon.Realtime
 
         /// <summary>(223) Sent by Photon to update a token before it times out.</summary>
         public const byte AuthEvent = 223;
+
+        public static explicit operator EventCode(byte v)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
